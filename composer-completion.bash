@@ -1,4 +1,7 @@
 #!/bin/bash
+# Bit of shell completion for composer packages
+# Thanks to https://debian-administration.org/article/317/An_introduction_to_bash_completion_part_2
+#
 
 _composer()
 {
@@ -8,7 +11,7 @@ _composer()
     previous="${COMP_WORDS[COMP_CWORD-1]}"
 
     # dash options
-    dashopts="--help --verbose --quiet --version --no-ansi --ansi \
+    dashopts="-h -q -V -n -d -v -vv -vvv --help --verbose --quiet --version --no-ansi --ansi \
     --no-interaction --profile --no-plugins --working-dir"
 
     # all commands
@@ -29,17 +32,26 @@ _composer()
 
       # updates
       "update" | "remove" )
-        local packages=`require`
+        local packages="--dev "
+        packages+=`require`
 
         COMPREPLY=( $(compgen -W "${packages}" -- ${current}) )
 
         return 0
       ;;
+
+      # --dev
+      "--dev" )
+          COMPREPLY=( $(compgen -W "`requireDev`" -- ${current}) )
+
+        return 0
+      ;;
     esac
 
-
+    # Hyphenated string
     if [[ ${current} == -* ]] ; then
         COMPREPLY=( $(compgen -W "${dashopts}" -- ${current}) )
+    # Empty catch-all
     else
         COMPREPLY=( $(compgen -W "${allopts}" -- ${current}) )
     fi
@@ -52,6 +64,18 @@ function require() {
   if [ -f composer.json ]; then
     local packages=()
     for package in $(awk '/\"require\"/{f=1;next} /\}/{f=0} f' composer.json | sed -e 's/:.*//' | sed -e 's/"//g')
+    do
+      packages+=($package)
+    done
+  fi
+
+  echo "${packages[@]}"
+}
+
+function requireDev() {
+  if [ -f composer.json ]; then
+    local packages=()
+    for package in $(awk '/\"require-dev\"/{f=1;next} /\}/{f=0} f' composer.json | sed -e 's/:.*//' | sed -e 's/"//g')
     do
       packages+=($package)
     done
