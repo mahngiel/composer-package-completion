@@ -22,7 +22,7 @@ _composer()
       # requires
       "require" )
         local reqOpts="--dev"
-            COMPREPLY=( $(compgen -W "${reqOpts}" -- ${current}) )
+        COMPREPLY=( $(compgen -W "${reqOpts}" -- ${current}) )
 
         return 0
       ;;
@@ -39,8 +39,12 @@ _composer()
 
       # --dev
       "--dev" )
-        local pkgs=$(getPackages 'require-dev')
-          COMPREPLY=( $(compgen -W "${pkgs}" -- ${current}) )
+
+        # differentiate update/remove from install
+        if [[ ${COMP_WORDS[COMP_CWORD-2]} != 'require' ]]; then
+          local pkgs=$(getPackages 'require-dev')
+            COMPREPLY=( $(compgen -W "${pkgs}" -- ${current}) )
+        fi
 
         return 0
       ;;
