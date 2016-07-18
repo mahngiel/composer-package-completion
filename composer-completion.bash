@@ -33,7 +33,7 @@ _composer()
       # updates
       "update" | "remove" )
         local packages="--dev "
-        packages+=`require`
+        packages+=$(getPackages 'require')
 
         COMPREPLY=( $(compgen -W "${packages}" -- ${current}) )
 
@@ -42,7 +42,8 @@ _composer()
 
       # --dev
       "--dev" )
-          COMPREPLY=( $(compgen -W "`requireDev`" -- ${current}) )
+        local pkgs=$(getPackages 'require-dev')
+          COMPREPLY=( $(compgen -W "${pkgs}" -- ${current}) )
 
         return 0
       ;;
@@ -60,40 +61,17 @@ _composer()
     return 0
 }
 
-function require() {
+# Bit o' hacky greppage to sniff packages in the composer file
+function getPackages() {
   if [ -f composer.json ]; then
     local packages=()
-    for package in $(awk '/\"require\"/{f=1;next} /\}/{f=0} f' composer.json | sed -e 's/:.*//' | sed -e 's/"//g')
+    for package in $(awk "/\"$1\"/{f=1;next} /\}/{f=0} f" composer.json | sed -e 's/:.*//' | sed -e 's/"//g')
     do
       packages+=($package)
     done
   fi
 
   echo "${packages[@]}"
-}
-
-function requireDev() {
-  if [ -f composer.json ]; then
-    local packages=()
-    for package in $(awk '/\"require-dev\"/{f=1;next} /\}/{f=0} f' composer.json | sed -e 's/:.*//' | sed -e 's/"//g')
-    do
-      packages+=($package)
-    done
-  fi
-
-  echo "${packages[@]}"
-}
-
-function testComposerFile() {
-  if [ ! -f composer.json ]; then
-    echo ""
-    echo "No composer.json in PWD"
-    echo ""
-
-    return false
-  fi
-
-  return true
 }
 
 complete -F _composer composer
