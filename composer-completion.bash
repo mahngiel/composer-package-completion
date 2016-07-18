@@ -11,14 +11,11 @@ _composer()
     previous="${COMP_WORDS[COMP_CWORD-1]}"
 
     # dash options
-    dashopts="-h -q -V -n -d -v -vv -vvv --help --verbose --quiet --version --no-ansi --ansi \
-    --no-interaction --profile --no-plugins --working-dir"
+    dashopts="-h -q -V -n -d -v -vv -vvv --help --verbose --quiet --version"
 
-    # all commands
-    allopts="about archive browse clear-cache clearcache  config create-project \
-    depends diagnose dump-autoload dumpautoload exec global help home info \
-    init install licenses list outdated prohibits remove require run-script \
-    search self-update selfupdate show status suggests update validate why why-not"
+    # only show the useful commands. they can get to the rest w/ plan composer or --help
+    allopts="clear-cache config diagnose dump-autoload help home install \
+    list outdated remove require search self-update show status suggests update validate"
 
     # Args we want to complete
     case "${previous}" in
